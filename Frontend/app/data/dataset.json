@@ -1,0 +1,44 @@
+{
+  "words": [
+    {
+      "label": "Hello",
+      "image": "images/hello/replace_me.jpg",
+      "type": "static"
+    },
+    {
+      "label": "Thanks",
+      "image": "images/thanks/replace_me.jpg",
+      "type": "static"
+    },
+    {
+      "label": "Yes",
+      "image": "images/yes/replace_me.jpg",
+      "type": "static"
+    },
+    {
+      "label": "No",
+      "image": "images/no/replace_me.jpg",
+      "type": "static"
+    },
+    {
+      "label": "today",
+      "image": "images/today/today1_User1_1.jpg",
+      "type": "static"
+    },
+    {
+      "label": "bad",
+      "image": "images/bad/bad_602_User5_602 - Copy - Copy - Copy - Copy.jpg",
+      "type": "static"
+    },
+    {
+      "label": "iloveyou",
+      "image": "images/iloveyou/replace.jpg",
+      "type": "dynamic"
+    },
+    {
+      "label": "monday",
+      "image": "images/iloveyou/replace.jpg",
+      "type": "dynamic"
+    }
+  ]
+}

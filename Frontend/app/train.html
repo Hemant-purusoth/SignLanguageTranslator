@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Personal Training Dashboard | Sign Language</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- MediaPipe Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <!-- Socket.io -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
+
+  <script src="javascript/theme.js"></script>
+  <script src="javascript/train.js" defer></script>
+</head>
+
+<body>
+
+  <nav>
+    <a href="index.html" class="back-home"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+      <i class="fas fa-moon"></i>
+    </button>
+  </nav>
+
+  <header class="page-header">
+    <h1>Train Gestures</h1>
+    <p>Add personal customized signs safely without overwriting the core application.</p>
+  </header>
+
+  <main class="train-container" style="grid-template-columns: 2fr 1fr;">
+
+    <div class="train-left" style="position: relative;">
+      <!-- Video Element instead of placeholder -->
+      <video id="trainCamera" autoplay playsinline
+        style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; background: #111; min-height: 480px;"></video>
+      <div id="cameraOverlay"
+        style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); border-radius: 12px; color: white; display: none;">
+        <h2>GET READY!</h2>
+      </div>
+    </div>
+
+    <div class="train-right card" style="display: flex; flex-direction: column; gap: 15px; padding: 25px;">
+
+      <div>
+        <label>Gesture Label (e.g., 'Tiger')</label>
+        <input type="text" id="gestureLabel" placeholder="Enter new custom gesture">
+      </div>
+
+      <div>
+        <label>Gesture Type</label>
+        <select id="gestureType"
+          style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color);">
+          <option value="static">Static (Shape - 200 Images)</option>
+          <option value="dynamic">Dynamic (Movement - 30 Videos)</option>
+        </select>
+      </div>
+
+      <button id="checkBtn" class="primary-btn"><i class="fas fa-search"></i> Check Availability</button>
+
+      <!-- System Message Box -->
+      <div id="statusMessage" style="padding: 10px; border-radius: 8px; font-weight: 600; text-align: center;"></div>
+
+      <button id="recordBtn" class="primary-btn" style="background: var(--danger-color); display: none;">
+        <i class="fas fa-circle"></i> Start Recording
+      </button>
+
+      <p id="progressText" class="sample-count text-muted" style="text-align: center; margin-top: 10px;">Awaiting
+        Verification...</p>
+    </div>
+
+  </main>
+
+  <!-- User Dataset Dashboard -->
+  <section class="user-dashboard-section" style="max-width: 1200px; margin: 40px auto; padding: 0 5%;">
+    <h2>My Trained Gestures</h2>
+    <p class="text-muted">Gestures you have successfully added to your personal profile.</p>
+
+    <div class="table-container card" style="margin-top: 20px; overflow-x: auto;">
+      <table style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border-color);">
+            <th style="padding: 15px;">Gesture Name</th>
+            <th style="padding: 15px;">Type</th>
+            <th style="padding: 15px;">Status</th>
+            <th style="padding: 15px;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="userGesturesTable">
+          <!-- Javascript populate this -->
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 20px; text-align: right;">
+      <button id="trainAllBtn" class="primary-btn"><i class="fas fa-brain"></i> Train Selected Models Now</button>
+    </div>
+  </section>
+
+</body>
+
+</html>

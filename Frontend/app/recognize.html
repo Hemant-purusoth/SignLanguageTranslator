@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Learn & Practice | Sign Language Translator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="javascript/theme.js"></script>
+  <!-- Load Socket.IO for Python Backend Communication -->
+  <!-- MediaPipe Libraries for Client-Side Processing -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
+  <script src="javascript/recognize.js"></script>
+</head>
+
+<body>
+
+  <nav>
+    <a href="index.html" class="back-home"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+      <i class="fas fa-moon"></i>
+    </button>
+  </nav>
+
+  <header class="page-header">
+    <h1>Learn & Practice</h1>
+    <p>Learn sign language from examples and practice using live recognition.</p>
+  </header>
+
+  <main class="learn-practice-container">
+
+    <!-- PRACTICE SECTION (Camera - 70%) -->
+    <section class="practice-section">
+      <h3><i class="fas fa-video"></i> Practice</h3>
+
+      <!-- Real Video Element -->
+      <video id="practiceCamera" autoplay playsinline></video>
+
+      <p class="selected-word">
+        Selected Word: <strong id="selectedWordDisplay">None</strong>
+      </p>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="startPracticeBtn" class="primary-btn"><i class="fas fa-play"></i> Start Practice</button>
+        <button id="endPracticeBtn"><i class="fas fa-stop"></i> End Practice</button>
+      </div>
+
+      <div class="output-box" id="outputBox">
+        Show the sign to practice
+      </div>
+    </section>
+
+    <!-- LEARN SECTION (Search - 30%) -->
+    <section class="learn-section">
+      <h3><i class="fas fa-search"></i> Search Word</h3>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Enter word (e.g. HELLO)">
+        <button id="searchBtn"><i class="fas fa-check"></i> Check</button>
+      </div>
+
+      <p id="searchMessage" class="text-muted"></p>
+
+      <div class="reference-image-container" style="text-align: center; margin-top: 15px;">
+        <img id="referenceImage" src="" alt=""
+          style="display:none; max-width:100%; border-radius: 12px; box-shadow: var(--shadow-sm);">
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Load JS LAST -->
+  <script src="javascript/recognize.js"></script>
+
+</body>
+
+</html>

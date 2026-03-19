@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Language Translator | Application</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Theme Switching Logic -->
+  <script src="javascript/theme.js"></script>
+</head>
+
+<body>
+
+  <nav>
+    <a href="../landing/index2.html" class="back-home"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+      <i class="fas fa-moon"></i>
+    </button>
+  </nav>
+
+  <header class="app-header">
+    <h1>Sign Language Translator</h1>
+    <p>AI-powered Indian Sign Language Translation Platform</p>
+  </header>
+
+  <main class="app-container">
+
+    <div class="app-card" onclick="goTo('train.html')">
+      <i class="fas fa-hand-sparkles card-icon"></i>
+      <h2>Train Gestures</h2>
+      <p>Train the system with custom sign language gestures to personalize the AI model.</p>
+    </div>
+
+    <div class="app-card" onclick="goTo('recognize.html')">
+      <i class="fas fa-language card-icon"></i>
+      <h2>Learn & Recognize</h2>
+      <p>Translate hand gestures into text in real time with high accuracy.</p>
+    </div>
+
+    <div class="app-card" onclick="goTo('videocall.html')">
+      <i class="fas fa-video card-icon"></i>
+      <h2>Video Call</h2>
+      <p>Communicate seamlessly through video calls with live AI-powered gesture translation.</p>
+    </div>
+
+  </main>
+
+  <script src="javascript/app.js"></script>
+</body>
+
+</html>
