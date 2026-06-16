@@ -1,7 +1,7 @@
 flask
 flask-socketio
 numpy
-tensorflow
+tensorflow==2.16.1
 scikit-learn
 pandas
 opencv-python-headless
