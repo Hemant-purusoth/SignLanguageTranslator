@@ -1,0 +1,11 @@
+flask
+flask-socketio
+numpy
+tensorflow
+scikit-learn
+pandas
+opencv-python-headless
+mediapipe
+h5py
+eventlet
+gunicorn
