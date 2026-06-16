@@ -2,17 +2,17 @@
   "words": [
     {
       "label": "Hello",
-      "image": "images/hello/replace_me.jpg",
+      "image": "images/Hello/Hello.png",
       "type": "static"
     },
     {
       "label": "Thanks",
-      "image": "images/thanks/replace_me.jpg",
+      "image": "images/thankyou/Thank you.png",
       "type": "static"
     },
     {
       "label": "Yes",
-      "image": "images/yes/replace_me.jpg",
+      "image": "images/yes/",
       "type": "static"
     },
     {
@@ -31,14 +31,44 @@
       "type": "static"
     },
     {
-      "label": "iloveyou",
+      "label": "monday",
       "image": "images/iloveyou/replace.jpg",
       "type": "dynamic"
     },
     {
-      "label": "monday",
+      "label": "i",
+      "image": "images/I/I.png",
+      "type": "static"
+    },
+    {
+      "label": "you",
       "image": "images/iloveyou/replace.jpg",
-      "type": "dynamic"
+      "type": "static"
+    },
+    {
+      "label": "DOCTOR",
+      "image": "images/doctor/Doctor.png",
+      "type": "static"
+    },
+    {
+      "label": "HELP",
+      "image": "images/Help/help.png",
+      "type": "static"
+    },
+    {
+      "label": "LOSE",
+      "image": "images/Lose/Lose.png",
+      "type": "static"
+    },
+    {
+      "label": "PAIN",
+      "image": "images/pain/Pain.png",
+      "type": "static"
+    },
+    {
+      "label": "THIEF",
+      "image": "images/Theif/Theif.png",
+      "type": "static"
     }
   ]
 }

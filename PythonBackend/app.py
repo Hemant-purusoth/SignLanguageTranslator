@@ -5,7 +5,7 @@ import tensorflow as tf
 import pickle
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Frontend')), static_url_path='/')
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 import json
@@ -37,9 +37,9 @@ sequence_length = 30
 try:
     model_path = os.path.join(os.path.dirname(__file__), 'action_model.h5')
     dynamic_model = tf.keras.models.load_model(model_path)
-    print(f"✅ LSTM Sequence Model loaded successfully from {model_path}")
+    print(f"[SUCCESS] LSTM Sequence Model loaded successfully from {model_path}")
 except Exception as e:
-    print(f"❌ Error loading sequence model: {e}")
+    print(f"[ERROR] Error loading sequence model: {e}")
     dynamic_model = None
 
 # Load Old Random Forest Model (Static)
@@ -48,18 +48,19 @@ try:
     with open(static_model_path, 'rb') as f:
         model_dict = pickle.load(f)
         static_model = model_dict['model']
-    print(f"✅ Static ML Model loaded successfully from {static_model_path}")
+    print(f"[SUCCESS] Static ML Model loaded successfully from {static_model_path}")
 except Exception as e:
-    print(f"❌ Error loading static model: {e}")
+    print(f"[ERROR] Error loading static model: {e}")
     static_model = None
 
 # Global state
 sequence_buffer = []
 current_mode = "dynamic"  # defaults to dynamic
 
+from flask import redirect
 @app.route('/')
 def home():
-    return "Python Dual-Model Sign Language Backend Running 🚀"
+    return redirect('/landing/index2.html')
 
 @socketio.on('set_mode')
 def handle_set_mode(data):
@@ -235,7 +236,7 @@ def handle_recording_complete(payload):
         with open(user_json_path, 'w') as f:
             json.dump(data, f, indent=4)
             
-        print(f"✅ User Gesture '{label}' saved to database.")
+        print(f"[SUCCESS] User Gesture '{label}' saved to database.")
     except Exception as e:
         print(f"Error saving to user_dataset.json: {e}")
 
@@ -258,7 +259,7 @@ def handle_delete(payload):
     mp_dir = os.path.join(os.path.dirname(__file__), 'MP_Data', label)
     if os.path.exists(mp_dir):
         shutil.rmtree(mp_dir)
-        print(f"🗑️ Deleted folder: {mp_dir}")
+        print(f"[DELETED] Deleted folder: {mp_dir}")
         
     csv_path = os.path.join(os.path.dirname(__file__), 'dataset.csv')
     if os.path.exists(csv_path):
@@ -268,7 +269,7 @@ def handle_delete(payload):
             # Filter out the rows where the label matches
             df = df[df.iloc[:, 0] != label]
             df.to_csv(csv_path, index=False)
-            print(f"🗑️ Cleaned {label} from dataset.csv")
+            print(f"[DELETED] Cleaned {label} from dataset.csv")
         except Exception:
             pass
 
@@ -278,7 +279,7 @@ import os
 
 @socketio.on('trigger_training')
 def handle_train():
-    print("🚀 Background Training Triggered via Web Dashboard")
+    print("[START] Background Training Triggered via Web Dashboard")
     try:
         backend_dir = os.path.dirname(os.path.abspath(__file__))
         # Run explicitly using the SAME python executable that is running app.py
@@ -303,7 +304,7 @@ def handle_join_room(room_id):
     num_users = len(participants)
     
     if num_users >= 2:
-        print(f"❌ Rejected: Room {room_id} is full (has {num_users} users).")
+        print(f"[ERROR] Rejected: Room {room_id} is full (has {num_users} users).")
         emit('room-full', room_id)
         return
         
@@ -314,10 +315,10 @@ def handle_join_room(room_id):
     num_users_after = len(participants_after)
     
     if num_users_after == 1:
-        print(f"🟢 Room CREATED: {room_id} by first user.")
+        print(f"[INFO] Room CREATED: {room_id} by first user.")
         emit('room-created', room_id)
     else:
-        print(f"🤝 User JOINED room: {room_id}. Room now full ({num_users_after}/2).")
+        print(f"[JOINED] User JOINED room: {room_id}. Room now full ({num_users_after}/2).")
         # Notify others in the room that someone new joined
         emit('user-joined', room_id, to=room_id, include_self=False)
 
@@ -342,5 +343,5 @@ def handle_clear_sequence():
     sequence_buffer = []
 
 if __name__ == '__main__':
-    print("🚀 Starting Server on port 5000...")
-    socketio.run(app, host='0.0.0.0', port=5000)
+    print("[START] Starting Server on port 5000...")
+    socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)

@@ -1,12 +1,3 @@
 {
-    "words": [
-        {
-            "label": "friend",
-            "type": "static"
-        },
-        {
-            "label": "good",
-            "type": "static"
-        }
-    ]
+    "words": []
 }

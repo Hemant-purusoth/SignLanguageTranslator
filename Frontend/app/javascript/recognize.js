@@ -1,9 +1,8 @@
 window.addEventListener("DOMContentLoaded", () => {
 
-  const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
-  const searchMessage = document.getElementById("searchMessage");
   const referenceImage = document.getElementById("referenceImage");
+  const wordBankContainer = document.getElementById("wordBankContainer");
   const startBtn = document.getElementById("startPracticeBtn");
   const endBtn = document.getElementById("endPracticeBtn");
   const outputBox = document.getElementById("outputBox");
@@ -26,6 +25,7 @@ window.addEventListener("DOMContentLoaded", () => {
     .then(([coreData, userData]) => {
       datasetWords = [...coreData.words, ...userData.words];
       console.log(`✅ Loaded ${datasetWords.length} total gestures (Core: ${coreData.words.length}, Custom: ${userData.words.length})`);
+      renderWordBank(datasetWords);
     })
     .catch(err => console.error("❌ Dataset error:", err));
 
@@ -63,29 +63,35 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
   // ==============================
-  // SEARCH WORD
+  // WORD BANK & SEARCH FILTERING
   // ==============================
-  searchBtn.addEventListener("click", () => {
-    const userWord = searchInput.value.trim().toUpperCase();
+  function renderWordBank(wordsToRender) {
+    wordBankContainer.innerHTML = "";
+    wordsToRender.forEach(word => {
+      const chip = document.createElement("div");
+      chip.className = `sign-card ${selectedWord === word.label ? "active" : ""}`;
+      chip.innerHTML = `<i class="fas fa-hand-sparkles" style="opacity: 0.5; margin-bottom: 8px; display: block; font-size: 1.2rem;"></i>${word.label}`;
+      chip.onclick = () => selectWord(word);
+      wordBankContainer.appendChild(chip);
+    });
+  }
 
-    const foundWord = datasetWords.find(
-      word => word.label.toUpperCase() === userWord
-    );
+  function selectWord(wordObj) {
+    selectedWord = wordObj.label;
+    selectedWordType = wordObj.type || "dynamic";
+    referenceImage.src = wordObj.image && wordObj.image !== "" ? wordObj.image : "";
+    referenceImage.style.display = wordObj.image && wordObj.image !== "" ? "block" : "none";
+    selectedWordDisplay.innerText = selectedWord;
+    
+    // Refresh UI to show the 'active' highlight ring
+    renderWordBank(datasetWords);
+  }
 
-    if (foundWord) {
-      selectedWord = foundWord.label;
-      selectedWordType = foundWord.type || "dynamic"; // Default to dynamic if missing
-      searchMessage.innerText = "✅ Word found in dataset.";
-      referenceImage.src = foundWord.image;
-      referenceImage.style.display = "block";
-      selectedWordDisplay.innerText = selectedWord;
-    } else {
-      searchMessage.innerText = "❌ Word not found in dataset.";
-      referenceImage.style.display = "none";
-      selectedWord = "";
-      selectedWordType = "";
-      selectedWordDisplay.innerText = "None";
-    }
+  // Live filter feature for when the user gets 100+ words
+  searchInput.addEventListener("input", (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    const filtered = datasetWords.filter(word => word.label.toLowerCase().includes(term));
+    renderWordBank(filtered);
   });
 
   // ==============================

@@ -13,8 +13,8 @@ hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 DATA_FILE = 'dataset.csv'
 
 # Define the static words you want to train here
-WORDS_TO_TRAIN = ["Hello", "Thanks", "Yes", "No","today","bad"]
-SAMPLES_PER_WORD = 200
+WORDS_TO_TRAIN = ["Hello", "Thanks", "Yes", "No","today","bad",   "doctor", "help",  "lose", "pain" , "thief","i" , "you"]
+SAMPLES_PER_WORD = 1000
 
 def initialize_csv():
     if not os.path.exists(DATA_FILE):

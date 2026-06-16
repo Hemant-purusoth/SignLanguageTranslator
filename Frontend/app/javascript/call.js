@@ -25,6 +25,14 @@ let sentenceBuffer = [];
 let lastGestureTime = 0;
 const SENTENCE_TIMEOUT_MS = 2500; // Clear sentence 2.5s after last word
 
+// --- NEW DEBOUNCE STATE ---
+let pendingWord = "";
+let consecutiveFrames = 0;
+const REQUIRED_FRAMES = 2; // Dropped to 2 so it is fast and easy to trigger
+const COOLDOWN_MS = 400;   // Dropped to 400ms so you don't feel blocked
+let lastAcceptedTime = 0;
+// --------------------------
+
 // UI Elements
 let lobbySection, callSection, modeSignerCard, modeSpeakerCard, roomIdInput, joinCallBtn, createRoomBtn, lobbyStatus;
 let localVideo, remoteVideo, endCallBtn, muteBtn, statusMessage, localSubtitles, remoteSubtitles, previewText;
@@ -252,8 +260,8 @@ function createPeerConnection() {
 function initSignerPipeline() {
     previewText.innerText = "Initializing Gesture Tracking...";
     
-    // Tell backend we are doing BOTH static and dynamic sign predictions
-    socket.emit('set_mode', { type: "both" });
+    // Tell the backend to only use the static model for video calls to prevent ghost inputs
+    socket.emit('set_mode', { type: "static" });
 
     hands = new Hands({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -312,27 +320,64 @@ function initSignerPipeline() {
 socket.on('prediction', (data) => {
     if (userMode !== 'signer' || !isCallActive) return;
     
+    const now = Date.now();
+
+    // Check if we are in the cooldown period
+    if (now - lastAcceptedTime < COOLDOWN_MS) {
+        // Drop frames entirely during cooldown to prevent transition ghosting
+        pendingWord = "";
+        consecutiveFrames = 0;
+        return;
+    }
+    
     if (data.confidence > 0.85) {
-        // Simple Debounce: Don't add if it's the exact same word we just added
-        const lastWord = sentenceBuffer.length > 0 ? sentenceBuffer[sentenceBuffer.length - 1] : "";
-        if (lastWord !== data.label) {
-            sentenceBuffer.push(data.label);
-            lastGestureTime = Date.now();
+        // Temporal Consensus: the AI must guess the same word consecutively
+        if (data.label === pendingWord) {
+            consecutiveFrames++;
+        } else {
+            pendingWord = data.label;
+            consecutiveFrames = 1;
+        }
+
+        // Only accept if we hit the required frame count safely
+        if (consecutiveFrames >= REQUIRED_FRAMES) {
             
-            const currentSentence = sentenceBuffer.join(" ") + "...";
+            // Reset debounce state right away
+            pendingWord = "";
+            consecutiveFrames = 0;
+            lastAcceptedTime = now;
+
+            sentenceBuffer.push(data.label);
+            lastGestureTime = now;
+            
+            // Helper function to capitalize
+            const formatSentence = (words) => {
+                if (words.length === 0) return "";
+                let text = words.join(" ").toLowerCase();
+                return text.charAt(0).toUpperCase() + text.slice(1);
+            };
+
+            const currentSentence = formatSentence(sentenceBuffer) + "...";
             localSubtitles.innerText = currentSentence;
             
             // Broadcast current draft sentence to remote user
             socket.emit('translation', { room: roomId, text: currentSentence, final: false });
         }
+    } else {
+        // If confidence drops below 85%, break the consecutive streak
+        pendingWord = "";
+        consecutiveFrames = 0;
     }
 });
 
 function commitSentence() {
-    const finalSentence = sentenceBuffer.join(" ");
-    localSubtitles.innerText = finalSentence;
+    if (sentenceBuffer.length === 0) return;
+    const finalSentence = sentenceBuffer.map(w => w.toLowerCase()).join(" ");
+    const formatted = finalSentence.charAt(0).toUpperCase() + finalSentence.slice(1) + ".";
+    
+    localSubtitles.innerText = formatted;
     // Broadcast final sentence
-    socket.emit('translation', { room: roomId, text: finalSentence, final: true });
+    socket.emit('translation', { room: roomId, text: formatted, final: true });
     
     // Clear buffer
     sentenceBuffer = [];
