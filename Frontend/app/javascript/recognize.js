@@ -32,7 +32,8 @@ window.addEventListener("DOMContentLoaded", () => {
   // ==============================
   // BACKEND CONNECTION (Socket.IO)
   // ==============================
-  const socket = io('http://localhost:5000');
+  const socket = io();
+
 
   socket.on('connect', () => {
     console.log('✅ Connected to Python Backend');
@@ -82,7 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
     referenceImage.src = wordObj.image && wordObj.image !== "" ? wordObj.image : "";
     referenceImage.style.display = wordObj.image && wordObj.image !== "" ? "block" : "none";
     selectedWordDisplay.innerText = selectedWord;
-    
+
     // Refresh UI to show the 'active' highlight ring
     renderWordBank(datasetWords);
   }

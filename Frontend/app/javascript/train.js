@@ -21,7 +21,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     let targetSequences = 0;
 
     // Socket Connection
-    const socket = io('http://localhost:5000');
+    const socket = io();
+
 
     // Load datasets dynamically
     async function loadDatasets() {

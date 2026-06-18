@@ -343,5 +343,7 @@ def handle_clear_sequence():
     sequence_buffer = []
 
 if __name__ == '__main__':
-    print("[START] Starting Server on port 5000...")
-    socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
+    import os
+
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host='0.0.0.0', port=port)

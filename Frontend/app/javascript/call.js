@@ -2,7 +2,8 @@
 // GLOBAL STATE & ELEMENTS
 // ==============================
 // Use the current host IP so it works across devices on the network
-const socket = io(`http://${window.location.hostname}:5000`);
+const socket = io();
+
 
 // Initialize State
 userMode = null; // 'signer' or 'speaker'
@@ -38,17 +39,17 @@ let lobbySection, callSection, modeSignerCard, modeSpeakerCard, roomIdInput, joi
 let localVideo, remoteVideo, endCallBtn, muteBtn, statusMessage, localSubtitles, remoteSubtitles, previewText;
 
 // Expose selectMode globally just in case
-window.selectMode = function(mode) {
+window.selectMode = function (mode) {
     userMode = mode;
     if (modeSignerCard) modeSignerCard.classList.remove('selected');
     if (modeSpeakerCard) modeSpeakerCard.classList.remove('selected');
-    
+
     if (mode === 'signer') {
         if (modeSignerCard) modeSignerCard.classList.add('selected');
     } else {
         if (modeSpeakerCard) modeSpeakerCard.classList.add('selected');
     }
-    
+
     if (joinCallBtn) joinCallBtn.disabled = false;
     if (createRoomBtn) createRoomBtn.disabled = false;
 };
@@ -74,90 +75,90 @@ window.addEventListener('DOMContentLoaded', () => {
     remoteSubtitles = document.getElementById('remoteSubtitles');
     previewText = document.getElementById('previewText');
 
-// ==============================
-// 1. LOBBY LOGIC
-// ==============================
+    // ==============================
+    // 1. LOBBY LOGIC
+    // ==============================
 
-modeSignerCard.addEventListener('click', () => selectMode('signer'));
-modeSpeakerCard.addEventListener('click', () => selectMode('speaker'));
+    modeSignerCard.addEventListener('click', () => selectMode('signer'));
+    modeSpeakerCard.addEventListener('click', () => selectMode('speaker'));
 
-// Create generic start call function
-async function startCallSequence(roomIdToJoin) {
-    lobbyStatus.innerText = "Requesting device permissions...";
-    joinCallBtn.disabled = true;
-    createRoomBtn.disabled = true;
+    // Create generic start call function
+    async function startCallSequence(roomIdToJoin) {
+        lobbyStatus.innerText = "Requesting device permissions...";
+        joinCallBtn.disabled = true;
+        createRoomBtn.disabled = true;
 
-    try {
-        const constraints = { video: true, audio: true };
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        localVideo.srcObject = localStream;
-        
-        lobbySection.style.display = 'none';
-        callSection.style.display = 'block';
-        updateStatus(`Joining room: ${roomIdToJoin}...`);
-        isCallActive = true;
+        try {
+            const constraints = { video: true, audio: true };
+            localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            localVideo.srcObject = localStream;
 
-        if (userMode === 'signer') {
-            initSignerPipeline();
-        } else {
-            initSpeakerPipeline();
-        }
+            lobbySection.style.display = 'none';
+            callSection.style.display = 'block';
+            updateStatus(`Joining room: ${roomIdToJoin}...`);
+            isCallActive = true;
 
-        socket.emit('join-room', roomIdToJoin);
-        
-    } catch (err) {
-        console.error('Error accessing media:', err);
-        lobbyStatus.innerText = "Error accessing camera/microphone. Please check permissions.";
-        joinCallBtn.disabled = false;
-        createRoomBtn.disabled = false;
-    }
-}
+            if (userMode === 'signer') {
+                initSignerPipeline();
+            } else {
+                initSpeakerPipeline();
+            }
 
-joinCallBtn.addEventListener('click', () => {
-    roomId = roomIdInput.value.trim().toUpperCase();
-    if (!roomId) {
-        lobbyStatus.innerText = "Please enter a Room Code to join.";
-        return;
-    }
-    if (!userMode) return;
-    
-    startCallSequence(roomId);
-});
+            socket.emit('join-room', roomIdToJoin);
 
-createRoomBtn.addEventListener('click', () => {
-    if (!userMode) return;
-    // Generate random 6-character alphanumeric code
-    roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    startCallSequence(roomId);
-});
-
-endCallBtn.addEventListener('click', hangUp);
-
-muteBtn.addEventListener('click', () => {
-    if (localStream) {
-        // Toggle all audio tracks
-        const audioTracks = localStream.getAudioTracks();
-        isMuted = !isMuted;
-        
-        audioTracks.forEach(track => {
-            track.enabled = !isMuted; // disabled = muted
-        });
-        
-        if (isMuted) {
-            muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Unmute';
-            muteBtn.style.backgroundColor = 'var(--danger)';
-            muteBtn.style.color = 'white';
-        } else {
-            muteBtn.innerHTML = '<i class="fas fa-microphone"></i> Mute';
-            muteBtn.style.backgroundColor = 'var(--primary-light)';
-            muteBtn.style.color = 'var(--primary)';
+        } catch (err) {
+            console.error('Error accessing media:', err);
+            lobbyStatus.innerText = "Error accessing camera/microphone. Please check permissions.";
+            joinCallBtn.disabled = false;
+            createRoomBtn.disabled = false;
         }
     }
-});
 
-// ==============================
-// 2. WEBRTC SIGNALING
-// ==============================
+    joinCallBtn.addEventListener('click', () => {
+        roomId = roomIdInput.value.trim().toUpperCase();
+        if (!roomId) {
+            lobbyStatus.innerText = "Please enter a Room Code to join.";
+            return;
+        }
+        if (!userMode) return;
+
+        startCallSequence(roomId);
+    });
+
+    createRoomBtn.addEventListener('click', () => {
+        if (!userMode) return;
+        // Generate random 6-character alphanumeric code
+        roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        startCallSequence(roomId);
+    });
+
+    endCallBtn.addEventListener('click', hangUp);
+
+    muteBtn.addEventListener('click', () => {
+        if (localStream) {
+            // Toggle all audio tracks
+            const audioTracks = localStream.getAudioTracks();
+            isMuted = !isMuted;
+
+            audioTracks.forEach(track => {
+                track.enabled = !isMuted; // disabled = muted
+            });
+
+            if (isMuted) {
+                muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Unmute';
+                muteBtn.style.backgroundColor = 'var(--danger)';
+                muteBtn.style.color = 'white';
+            } else {
+                muteBtn.innerHTML = '<i class="fas fa-microphone"></i> Mute';
+                muteBtn.style.backgroundColor = 'var(--primary-light)';
+                muteBtn.style.color = 'var(--primary)';
+            }
+        }
+    });
+
+    // ==============================
+    // 2. WEBRTC SIGNALING
+    // ==============================
 
 }); // End of DOMContentLoaded
 
@@ -213,11 +214,11 @@ socket.on('signal', async (data) => {
             signal: { type: 'answer', sdp: answer }
         });
         updateStatus('Call connected!');
-        
+
     } else if (signal.type === 'answer') {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
         updateStatus('Call connected!');
-        
+
     } else if (signal.candidate) {
         try {
             if (peerConnection) {
@@ -259,7 +260,7 @@ function createPeerConnection() {
 
 function initSignerPipeline() {
     previewText.innerText = "Initializing Gesture Tracking...";
-    
+
     // Tell the backend to only use the static model for video calls to prevent ghost inputs
     socket.emit('set_mode', { type: "static" });
 
@@ -293,7 +294,7 @@ function initSignerPipeline() {
     // Start 15FPS processing loop
     let lastFrameTime = 0;
     const fpsInterval = 1000 / 15;
-    
+
     camera = new Camera(localVideo, {
         onFrame: async () => {
             if (!isCallActive) return;
@@ -302,7 +303,7 @@ function initSignerPipeline() {
                 lastFrameTime = now;
                 await hands.send({ image: localVideo });
             }
-            
+
             // Handle Sentence Timeout
             if (sentenceBuffer.length > 0 && (now - lastGestureTime) > SENTENCE_TIMEOUT_MS) {
                 commitSentence();
@@ -311,7 +312,7 @@ function initSignerPipeline() {
         width: 640,
         height: 480
     });
-    
+
     camera.start();
     previewText.innerText = "Signing Mode Active";
 }
@@ -319,7 +320,7 @@ function initSignerPipeline() {
 // Listen for Predictions from Python Backend
 socket.on('prediction', (data) => {
     if (userMode !== 'signer' || !isCallActive) return;
-    
+
     const now = Date.now();
 
     // Check if we are in the cooldown period
@@ -329,7 +330,7 @@ socket.on('prediction', (data) => {
         consecutiveFrames = 0;
         return;
     }
-    
+
     if (data.confidence > 0.85) {
         // Temporal Consensus: the AI must guess the same word consecutively
         if (data.label === pendingWord) {
@@ -341,7 +342,7 @@ socket.on('prediction', (data) => {
 
         // Only accept if we hit the required frame count safely
         if (consecutiveFrames >= REQUIRED_FRAMES) {
-            
+
             // Reset debounce state right away
             pendingWord = "";
             consecutiveFrames = 0;
@@ -349,7 +350,7 @@ socket.on('prediction', (data) => {
 
             sentenceBuffer.push(data.label);
             lastGestureTime = now;
-            
+
             // Helper function to capitalize
             const formatSentence = (words) => {
                 if (words.length === 0) return "";
@@ -359,7 +360,7 @@ socket.on('prediction', (data) => {
 
             const currentSentence = formatSentence(sentenceBuffer) + "...";
             localSubtitles.innerText = currentSentence;
-            
+
             // Broadcast current draft sentence to remote user
             socket.emit('translation', { room: roomId, text: currentSentence, final: false });
         }
@@ -374,11 +375,11 @@ function commitSentence() {
     if (sentenceBuffer.length === 0) return;
     const finalSentence = sentenceBuffer.map(w => w.toLowerCase()).join(" ");
     const formatted = finalSentence.charAt(0).toUpperCase() + finalSentence.slice(1) + ".";
-    
+
     localSubtitles.innerText = formatted;
     // Broadcast final sentence
     socket.emit('translation', { room: roomId, text: formatted, final: true });
-    
+
     // Clear buffer
     sentenceBuffer = [];
 }
@@ -390,7 +391,7 @@ function commitSentence() {
 
 function initSpeakerPipeline() {
     previewText.innerText = "Initializing Speech Recognition...";
-    
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         alert("Speech Recognition is not supported in this browser. Please use Chrome.");
@@ -410,7 +411,7 @@ function initSpeakerPipeline() {
     speechRecognition.onresult = (event) => {
         if (!isCallActive) return;
         lastResultTime = Date.now(); // Reset watchdog
-        
+
         let interimTranscript = '';
         let finalTranscript = '';
 
@@ -423,20 +424,20 @@ function initSpeakerPipeline() {
         }
 
         const displayText = finalTranscript || interimTranscript;
-        
+
         if (displayText.trim().length > 0) {
             clearTimeout(clearSubtitleTimeout);
             localSubtitles.innerText = displayText;
-            
-            socket.emit('translation', { 
-                room: roomId, 
-                text: displayText, 
-                final: !!finalTranscript 
+
+            socket.emit('translation', {
+                room: roomId,
+                text: displayText,
+                final: !!finalTranscript
             });
-            
+
             if (finalTranscript) {
-                clearSubtitleTimeout = setTimeout(() => { 
-                    if (isCallActive) localSubtitles.innerText = "Listening..."; 
+                clearSubtitleTimeout = setTimeout(() => {
+                    if (isCallActive) localSubtitles.innerText = "Listening...";
                 }, 3500);
             }
         }
@@ -448,12 +449,12 @@ function initSpeakerPipeline() {
             localSubtitles.innerText = `Mic Error: ${event.error}`;
         }
         // Force restart on error
-        try { speechRecognition.stop(); } catch(e) {}
+        try { speechRecognition.stop(); } catch (e) { }
     };
 
     speechRecognition.onend = () => {
         if (isCallActive) {
-            try { speechRecognition.start(); } catch(e) {}
+            try { speechRecognition.start(); } catch (e) { }
         }
     };
 
@@ -461,11 +462,11 @@ function initSpeakerPipeline() {
     // Watchdog timer: If no result for 10 seconds, force restart.
     watchdogInterval = setInterval(() => {
         if (isCallActive && (Date.now() - lastResultTime > 10000)) {
-            lastResultTime = Date.now(); 
+            lastResultTime = Date.now();
             try {
-                speechRecognition.stop(); 
+                speechRecognition.stop();
                 // onend will catch this and restart it
-            } catch(e) {}
+            } catch (e) { }
         }
         if (!isCallActive) {
             clearInterval(watchdogInterval);
@@ -475,7 +476,7 @@ function initSpeakerPipeline() {
     try {
         speechRecognition.start();
         previewText.innerText = "Speaking Mode Active. Microphone listening...";
-    } catch(err) {
+    } catch (err) {
         localSubtitles.innerText = "Failed to start microphone listener.";
     }
 }
@@ -487,7 +488,7 @@ function initSpeakerPipeline() {
 socket.on('translation', (data) => {
     if (data.text) {
         remoteSubtitles.innerText = data.text;
-        
+
         if (data.final) {
             // If it's a final sentence, leave it for a few seconds then clear
             setTimeout(() => {
@@ -505,7 +506,7 @@ socket.on('translation', (data) => {
 
 function hangUp() {
     isCallActive = false;
-    
+
     if (peerConnection) {
         peerConnection.close();
         peerConnection = null;
