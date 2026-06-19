@@ -8,6 +8,10 @@ import os
 app = Flask(__name__, static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Frontend')), static_url_path='/')
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+# Make the socketio instance callable to support gunicorn deployments targeting app:socketio
+SocketIO.__call__ = lambda self, environ, start_response: app(environ, start_response)
+
+
 import json
 
 # Define exactly which actions the active sequence model was trained on via JSON
