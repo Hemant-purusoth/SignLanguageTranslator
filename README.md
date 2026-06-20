@@ -2,6 +2,8 @@
 
 A web application that translates sign language in real-time during secure peer-to-peer video calls.
 
+Live at : https://signlanguagetranslator-dzvr.onrender.com/landing/index2.html
+
 ## Features
 * **Real-time Translation:** Instantly translates hand gestures into text captions.
 * **Secure Video Calling:** 1-on-1 WebRTC video rooms using unique room codes.
